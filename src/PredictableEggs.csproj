@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>PredictableEggs</AssemblyName>
+        <Description>A mod for Lethal Company</Description>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="CessilCellsCeaChells" Version="0.3.5" />
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IncludeAssets="compile" />
+        <PackageReference Include="Xilophor.LethalNetworkAPI" Version="2.1.7" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Assembly-CSharp">
+        <HintPath>..\lib-stripped\Managed-v50-strip\Assembly-CSharp.dll</HintPath>
+      </Reference>
+      <Reference Include="com.sigurd.csync">
+        <HintPath>..\lib-stripped\Mods-strip\com.sigurd.csync.dll</HintPath>
+      </Reference>
+      <Reference Include="MMHOOK_Assembly-CSharp">
+        <HintPath>..\lib-stripped\MMHOOK-v50-strip\MMHOOK_Assembly-CSharp.dll</HintPath>
+      </Reference>
+      <Reference Include="Unity.Netcode.Runtime">
+        <HintPath>..\lib-stripped\UnityEngine-strip\Unity.Netcode.Runtime.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+    
+    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
+        <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')" />
+    </Target>
+
+    <Target Name="PostBuild" AfterTargets="NetcodePatch">
+        <Exec Command="call &quot;$(SolutionDir)\buildpackage.bat&quot; &quot;$(TargetDir)&quot; &quot;$(SolutionDir)&quot; &quot;$(ProjectName)&quot;" />
+    </Target>
+</Project>
